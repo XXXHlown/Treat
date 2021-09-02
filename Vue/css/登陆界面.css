@@ -1,0 +1,53 @@
+<<<<<<< HEAD
+
+body{
+    background: url(../img/3.jpg.webp);
+    background-size: 100% 100%;
+    background-attachment: fixed;
+=======
+body {
+>>>>>>> a76e7035bf67a485a640d4d58a9f39ab01319779
+    text-align: center;
+    /*animation-name: login;
+    /*持续时间*/
+    /*animation-duration: 10s;
+    /*延时*/
+    /*animation-delay: 2s;
+    /*循环计数*/
+    /*animation-iteration-count: infinite;
+    /*播放状态*/
+    /*animation-play-state: running;  */
+}
+
+.form {
+    background: rgba(31, 47, 141, 0.5);
+    width: 400px;
+    margin: 120px auto;
+}
+
+h1 {
+    text-align: center;
+}
+
+.login {
+    width: 200px;
+    height: 10px;
+    margin: 0 auto;
+}
+
+/* @keyframes login{
+
+    0%{
+        background: url(img/1.jpg);
+        background-size: 100%;
+    }
+    50%
+    {
+        background: url(img/2.jpg);
+        background-size: 100%;
+    }
+    100%{
+        background: url(img/1.jpg);
+        background-size: 100%;
+    }
+} */

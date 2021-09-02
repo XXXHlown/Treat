@@ -1,0 +1,9 @@
+docker build -t meetspringboot .
+docker run -d -p 8000:8000 --link myredis:myredis --link mymysql:mymysql  --name mymsboot meetspringboot
+docker login 192.168.8.117:10002 -u admin -p admin123
+docker tag meetspringboot:latest 192.168.8.117:10002/private/meetspringboot:latest
+docker push 192.168.8.117:10002/private/meetspringboot:latest
+curl -X GET http://192.168.8.117:10002/v2/_catalog
+curl -X GET http://192.168.8.117:10002/v2/private/meetspringboot/tags/list
+curl --header "Accept:application/vnd.docker.distribution.manifest.v2+json" -I -XGET http://192.168.8.117:10002/v2/private/meetspringboot/manifests/latest
+curl --insecure --anyauth -u admin:admin123 -XDELETE http://192.168.8.117:10002/v2/private/meetspringboot/manifests/sha256:e02a763d0a0d17074fed39523799adcfcdd0c92fab65c741c2229007c2857350

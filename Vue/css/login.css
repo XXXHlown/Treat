@@ -1,0 +1,95 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box
+}
+
+html {
+    font-size: 12px;
+    font-family: Ubuntu, simHei, sans-serif;
+    font-weight: 400
+}
+
+
+fieldset {
+    border: 1px solid #BCBCBC;
+    padding: 15px;
+}
+
+input {
+    outline: none
+}
+
+input[type=text] {
+    border: 1px solid #ccc;
+    padding: .5rem .3rem;
+}
+
+input[type=text]:focus {
+    border-color: #42b983;
+}
+
+button {
+	outline: none;
+	padding: 5px 8px;
+	color: white;
+	border: 1px solid #BCBCBC;
+	background-color: #145877;
+	cursor: pointer;
+}
+
+button:hover {
+    opacity: 0.8;
+}
+
+#app {
+    width: 450px;
+    height: 200px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin: -150px 0 0 -200px;
+    background: rgb(255, 255, 255);
+    color: rgb(0, 0, 0)
+}
+
+#choose {
+    width: 500rem;
+    margin: 0 auto;
+    max-width: 720px;
+}
+
+.form-group {
+    margin: 10px;
+}
+
+.form-group>label {
+    display: inline-block;
+    width: 10rem;
+    text-align: right;
+}
+
+.form-group>input,
+.form-group>select {
+    display: inline-block;
+    height: 2.5rem;
+    line-height: 2.5rem;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.msg {
+    color: red;
+}
+
+.success {
+    color: green;
+}
+
+
+#mid-set {
+    margin: 0 auto;
+    max-width: 1400px;
+}

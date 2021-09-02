@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>查询界面(管理员)</title>
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	</head>
+
+	<body background="img/BG-3.JPG"
+		style=" background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+		<div id="app"
+			style="background:url('img/BG-4.png');background-size:100%;height:217px;background-attachment: fixed;">
+			<fieldset>
+				<legend>个人信息</legend>
+				<table align="center" class="topInfoTab" border="0" cellspacing="0" cellpadding="11px">
+					<tr>
+						<td><label>姓名</label></td>
+						<td> {{result.person.name}}</td>
+					</tr>
+					<tr>
+						<td><label>用户类型</label></td>
+						<td>{{result.person.root_type}}</td>
+						<td><label>性别</label></td>
+						<td>{{result.person.gender}}</td>
+					</tr>
+					<tr>
+						<td><label>社保卡号</label></td>
+						<td>{{result.person.sinum}}</td>
+						<td><label>医保类型</label></td>
+						<td>{{result.person.medical_categor}}</td>
+					</tr>
+				</table>
+			</fieldset>
+			<div id="choose">
+				<button @click="goP1()">审批界面</button>
+				<button @click="goP2()">报销界面</button>
+				<button @click="goPerson()">个人界面</button>
+			</div>
+		</div>
+
+
+		<script type="text/javascript" src="js/urlparse.js"></script>
+		<script type="text/javascript" src="js/axios.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<script type="text/javascript" src="js/message.js"></script>
+		<script>
+			const vm = new Vue({
+				el: "#app",
+				data: {
+					username: "",
+					password: "",
+					result: {
+						"person": {
+							"medical_categor": "",
+							"password": "",
+							"banknum": "",
+							"root_type": "",
+							"gender": "",
+							"sinum": "",
+							"name": "",
+							"p_id": "",
+							"username": ""
+						},
+					},
+				},
+				methods: {
+					goP1: function() {
+						location.replace("审批界面.html?username=" + this.username + "&password=" + this.password);
+					},
+					goP2: function() {
+						location.replace("报销界面.html?username=" + this.username + "&password=" + this.password);
+					},
+					goPerson: function() {
+						location.replace("个人界面.html?username=" + this.username + "&password=" + this.password);
+					}
+				},
+				created: function() {
+					var username = getQueryString("username");
+					var password = getQueryString("password");
+					if (!username || !password) {
+						location.href = "/错误界面.html";
+					}
+
+					this.username = username;
+					this.password = password;
+
+					//获取头部信息
+					axios.post("http://localhost:8088/bracelet/aproj/authentication/getPersonInfo", {
+							"username": username,
+							"password": password
+						})
+						.then(res => {
+							this.result.person = res.data.result;
+						})
+						.catch(error => {
+							location.href = "错误界面.html";
+						});
+				},
+				mounted: function() {
+					// 数据挂载DOM完成事件
+				}
+			});
+		</script>
+
+	</body>
+
+</html>

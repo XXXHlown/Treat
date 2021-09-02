@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>处方明细</title>
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	</head>
+
+
+	<body background="img/BG-3.JPG"
+		style=" background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+		<div id="app">
+			<fieldset
+				style="max-width: 720px;  background:url('img/BG-4.png');background-size:100%;height:270px;background-attachment: fixed;">
+				<legend>处方明细</legend>
+				<table align=" center" class="topInfoTab" border="0" cellspacing="0" cellpadding="11px">
+					<tr>
+						<td><label>处方编号：</label></td>
+						<td>{{result.list.re_id}}</td>
+					</tr>
+					<tr>
+						<td><label>社保卡号：</label></td>
+						<td>{{result.list.sinum}}</td>
+					</tr>
+					<tr>
+						<td><label>总金额：</label></td>
+						<td>{{result.list.all_price}}</td>
+					</tr>
+					<tr>
+						<td><label>姓名：</label></td>
+						<td> {{result.list.name}}</td>
+					</tr>
+					<tr>
+						<td><label>处方开具日期：</label></td>
+						<td>{{result.list.buy_date}}</td>
+					</tr>
+					<tr>
+						<td><label>处方开具医院：</label></td>
+						<td>{{result.list.buy_place}}</td>
+					</tr>
+					<tr>
+						<td><label>处方开具医生：</label></td>
+						<td>{{result.list.buy_doc}}</td>
+					</tr>
+				</table>
+			</fieldset>
+			<div id="mid-set">
+				<table align="center" class="personInfoTab">
+					<tr>
+						<th>序号</th>
+						<th>处方明细编号</th>
+						<th>处方编号</th>
+						<th>药品编号</th>
+						<th>药品名称</th>
+						<th>药品单价</th>
+						<th>药品等级</th>
+						<th>药品厂家</th>
+						<th>数量</th>
+						<th>备注</th>
+					</tr>
+					<tr v-for="(item,index) in list">
+						<td>{{index + 1}}</td>
+						<td>{{item.id}}</td>
+						<td>{{item.re_id}}</td>
+						<td>{{item.m_id}}</td>
+						<td>{{item.m_name}}</td>
+						<td>{{item.m_price}}</td>
+						<td>{{item.m_type}}</td>
+						<td>{{item.m_factory}}</td>
+						<td>{{item.count}}</td>
+						<td>{{item.option}}</td>
+					</tr>
+				</table>
+				<div id="#mid-set">
+					<button style="left: 50%;margin-left: 450px;" @click="goPerson()">返回</button>
+				</div>
+			</div>
+
+		</div>
+
+		<script type="text/javascript" src="js/urlparse.js"></script>
+		<script type="text/javascript" src="js/axios.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<script type="text/javascript" src="js/message.js"></script>
+		<script>
+			const vm = new Vue({
+				el: "#app",
+				data: {
+					result: {
+						"list": {}
+					},
+					list: []
+				},
+				methods: {
+					goPerson: function() {
+						location.replace("个人界面.html?username=" + this.result.list.username + "&password=" + this
+							.result.list.password);
+					}
+				},
+				created: function() {
+					var re_id = getQueryString("re_id");
+					if (!re_id) {
+						console.log("blank");
+						location.href = "/错误界面.html";
+					}
+
+					axios.post("http://localhost:8088/bracelet/aproj/detail/getlist", {
+							"re_id": re_id
+						})
+						.then(res => {
+							console.log(res.data.result);
+							this.list = res.data.result;
+						})
+						.catch(error => {
+							//	location.href = "错误界面.html";
+						});
+
+					axios.post("http://localhost:8088/bracelet/aproj/detail/getPersonInfo", {
+							"reId": re_id
+						})
+						.then(res => {
+							console.log(res.data.result);
+							this.result.list = res.data.result;
+						})
+						.catch(error => {
+							//	location.href = "错误界面.html";
+						});
+
+				},
+				mounted: function() {
+					// 数据挂载DOM完成事件
+				}
+			});
+		</script>
+
+	</body>
+
+</html>

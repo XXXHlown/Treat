@@ -1,0 +1,27 @@
+server:
+  port: 8088
+  servlet:
+    context-path: /bracelet
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/treat?useUnicode=true&characterEncoding=UTF-8&allowMultiQueries=true&serverTimezone=GMT%2B8
+    username: root
+    password: 123456
+  cache:
+    type: redis
+    redis:
+      time-to-live: 20000
+      cache-null-values: false
+mybatis-plus:
+  mapper-locations: com/max/bracelet/braceletapi/*/dao/*/xml
+  type-aliases-package: com.max.bracelet.braceletapi.*.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: true
+    jdbc-type-for-null: 'null'
+    default-statement-timeout: 3000
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      update-strategy: ignored

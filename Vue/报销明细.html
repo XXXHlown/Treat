@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>报销明细</title>
+		<link rel="stylesheet" type="text/css" href="css/审批明细.css">
+	</head>
+
+	<body background="img/BG-3.JPG"
+		style=" background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+		<div id="app">
+			<fieldset
+				style="max-width: 720px;  background:url('img/BG-4.png');background-size:100%;height:280px;background-attachment: fixed;">
+				<legend>处方明细</legend>
+				<table align=" center" class="topInfoTab" border="0" cellspacing="0" cellpadding="11px">
+					<tr>
+						<td><label>处方编号：</label></td>
+						<td>{{result.list.re_id}}</td>
+					</tr>
+					<tr>
+						<td><label>社保卡号：</label></td>
+						<td>{{result.list.sinum}}</td>
+					</tr>
+					<tr>
+						<td><label>姓名：</label></td>
+						<td> {{result.list.name}}</td>
+					</tr>
+					<tr>
+						<td><label>处方开具日期：</label></td>
+						<td>{{result.list.buy_date}}</td>
+						<td><label>审批提交日期：</label></td>
+						<td>{{result.list.approval_date}}</td>
+					</tr>
+					<tr>
+						<td><label>处方开具医院：</label></td>
+						<td>{{result.list.buy_place}}</td>
+						<td><label>处方开具医生：</label></td>
+						<td>{{result.list.buy_doc}}</td>
+					</tr>
+					<tr>
+						<td><label>医保类型：</label></td>
+						<td>{{result.list.medical_category}}</td>
+						<td><label>报销比例：</label></td>
+						<td>{{result.list.cvalue}}</td>
+					</tr>
+					<tr>
+						<td><label>总金额：</label></td>
+						<td>{{result.list.all_price}}</td>
+						<td><label>报销金额：</label></td>
+						<td>{{result.list.tm_price}}</td>
+					</tr>
+					<tr>
+						<td><label>实付金额：</label></td>
+						<td>{{result.list.pay_price}}</td>
+					</tr>
+				</table>
+			</fieldset>
+			<div id="mid-set">
+				<div style="width: 100%;float: left;">
+					<table align="left" class="personInfoTab">
+						<tr>
+							<th>序号</th>
+							<th>药品编号</th>
+							<th>药品名称</th>
+							<th>药品单价</th>
+							<th>药品等级</th>
+							<th>药品厂家</th>
+							<th>数量</th>
+							<th>审批状态</th>
+							<th>批注</th>
+							<th>报销金额</th>
+
+						</tr>
+						<tr v-for="(item,index) in list">
+							<td>{{index + 1}}</td>
+							<td>{{item.m_id}}</td>
+							<td>{{item.m_name}}</td>
+							<td>{{item.m_price}}</td>
+							<td>{{item.m_type}}</td>
+							<td>{{item.m_factory}}</td>
+							<td>{{item.count}}</td>
+							<td>{{item.approve_state}}</td>
+							<td>{{item.option}}</td>
+							<td>{{item.price}}</td>
+						</tr>
+					</table>
+				</div>
+				<div id="#mid-set">
+					<button v-if="ckf=='1'" style="left: 50%;margin-left: 437px;" @click="updateAll()">提交报销</button>
+				</div>
+				<div id="#mid-set">
+					<button v-if="ckf=='1'" style="left: 50%;margin-left: 450px;" @click="goBackTm()">返回</button>
+					<button v-if="ckf=='0'" style="left: 50%;margin-left: 450px;" @click="goBackPerson()">返回</button>
+				</div>
+
+			</div>
+		</div>
+		<script type="text/javascript" src="js/urlparse.js"></script>
+		<script type="text/javascript" src="js/axios.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<script type="text/javascript" src="js/message.js"></script>
+		<script>
+			const vm = new Vue({
+				el: "#app",
+				data: {
+					username: "",
+					password: "",
+					ckf: "",
+					result: {
+						"list": {}
+					},
+					re_id: "",
+					list: []
+				},
+				methods: {
+					updateAll: function() {
+						axios.post("http://localhost:8088/bracelet/aproj/treat/updateState", {
+								"re_id": this.re_id,
+								"approval_state": "S03"
+							})
+							.then(res => {
+								alert("报销成功！");
+								location.replace("报销界面.html?username=" + this.result.list.username +
+									"&password=" + this
+									.result.list.password);
+							})
+							.catch(error => {
+								location.href = "错误界面.html";
+							});
+					},
+					goBackTm: function() {
+						location.replace("报销界面.html?username=" + this.username + "&password=" + this.password);
+					},
+					goBackPerson: function() {
+						location.replace("个人界面.html?username=" + this.username + "&password=" + this.password);
+					}
+				},
+				created: function() {
+					var re_id = getQueryString("re_id");
+					var username = getQueryString("username");
+					var password = getQueryString("password");
+
+					this.ckf = getQueryString("ckf");
+					this.username = username;
+					this.password = password;
+					this.re_id = re_id;
+
+					axios.post("http://localhost:8088/bracelet/aproj/detail/getlist", {
+							"re_id": re_id
+						})
+						.then(res => {
+							this.list = res.data.result;
+							this.calculateList = new Array(this.list.length).fill(0);
+						})
+						.catch(error => {
+							//location.href = "错误界面.html";
+						});
+
+					axios.post("http://localhost:8088/bracelet/aproj/detail/getPersonInfo", {
+							"reId": re_id
+						})
+						.then(res => {
+							this.result.list = res.data.result;
+							this.username = res.data.result.username;
+							this.password = res.data.result.password;
+							this.all_price = res.data.result.all_price;
+							this.pay_price = res.data.result.all_price;
+							this.rate = res.data.result.cvalue;
+						})
+						.catch(error => {
+							location.href = "错误界面.html";
+						});
+
+				},
+				mounted: function() {
+					// 数据挂载DOM完成事件
+				}
+			});
+		</script>
+	</body>
+
+</html>

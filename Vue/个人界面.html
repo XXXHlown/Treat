@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8" />
+		<title>报销个人界面</title>
+		<link rel="stylesheet" type="text/css" href="css/demo.css" />
+	</head>
+
+	<body background="img/BG-3.JPG"
+		style=" background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+
+		<div id="app">
+			<fieldset
+				style="max-width: 720px;  background:url('img/BG-4.png');background-size:100%;height:250px;background-attachment: fixed;">
+				<legend>个人信息</legend>
+				<table align="center" class="topInfoTab" border="0" cellspacing="0" cellpadding="11px">
+					<tr>
+						<td><label>姓名</label></td>
+						<td> {{result.person.name}}</td>
+						<button v-if="result.person.root_type=='T01'" @click="goAdmin()">管理员后台</button>
+					</tr>
+					<tr>
+						<td><label>用户类型</label></td>
+						<td>{{result.person.root_type}}</td>
+						<td><label>性别</label></td>
+						<td>{{result.person.gender}}</td>
+					</tr>
+					<tr>
+						<td><label>社保卡号</label></td>
+						<td>{{result.person.sinum}}</td>
+						<td><label>医保类型</label></td>
+						<td>{{result.person.medical_categor}}</td>
+					</tr>
+				</table>
+			</fieldset>
+			<div class="sqArea">
+				<label style="font-size: 15px;">报销状态</label>
+				<select v-model="searchState">
+					<option v-for="item in searchlist" :value="item.ckey">{{item.cvalue}}</option>
+				</select>
+				<label></label>
+				<button @click="searchpage(1)">查询</button>
+			</div>
+			<div id="mid-set">
+				<table class="personInfoTab">
+					<tr>
+						<th><input v-if="searchState=='S01'" type="checkbox" v-model="selectall"
+								@change="mselectAll()" /></th>
+						<th>序号</th>
+						<th>处方编号</th>
+						<th>社保卡号</th>
+						<th>总金额</th>
+						<th>开具日期</th>
+						<th>报销状态</th>
+						<th>备注</th>
+						<th></th>
+					</tr>
+					<tr v-for="(item,index) in ress.list">
+						<td><input v-if="item.approval_state=='S01'" type="checkbox" v-model="bathselect"
+								:value="item.re_id" /></td>
+						<td>{{index + 1}}</td>
+						<td>{{item.re_id}}</td>
+						<td>{{item.sinum}}</td>
+						<td>{{item.all_price}}</td>
+						<td>{{item.buy_date}}</td>
+						<td>{{item.cvalue}}</td>
+						<td>{{item.approval_suggestion}}</td>
+						<td>
+							<button v-if="item.approval_state!='S04'" @click="goServant(item.re_id)">查看明细</button>
+							<button v-if="item.approval_state=='S04'" @click="goServant2(item.re_id)">查看明细</button>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="sqArea">
+				<ul class="pagination" style="margin-top: 2px;">
+					<li v-for="n in ress.pages">
+						<a href="javascript:void(0);" @click="searchpage(n)"
+							:class="{'active' : n==ress.pageNum}">{{n}}</a>
+					</li>
+					<li>
+						<select @change="searchpage(1)" v-model="pageSize">
+							<option v-for="item in pagecountlist" :value="item">{{item}}</option>
+						</select>
+					</li>
+				</ul>
+			</div>
+			<button style="display:block;margin:0 auto" @click="updateSta()">提交申请</button>
+		</div>
+
+		<script type="text/javascript" src="js/urlparse.js"></script>
+		<script type="text/javascript" src="js/axios.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<script type="text/javascript" src="js/message.js"></script>
+		<script>
+			const vm = new Vue({
+				el: "#app",
+				data: {
+					username: "",
+					password: "",
+					searchState: "S01",
+					pageSize: 5,
+					currentpage: 1,
+					searchlist: [],
+					ckf: 0,
+					ress: {
+						"list": {}
+					},
+					"pagecountlist": [5, 10, 20, 30, 50],
+					"bathselect": [],
+					"selectall": false,
+					result: {
+						"person": {
+							"medical_categor": "",
+							"password": "",
+							"banknum": "",
+							"root_type": "",
+							"gender": "",
+							"sinum": "",
+							"name": "",
+							"p_id": "",
+							"username": ""
+						},
+					},
+				},
+				methods: {
+					goAdmin: function() {
+						location.replace("管理员界面.html?username=" + this.username + "&password=" + this.password);
+					},
+					mselectAll: function() {
+						if (this.selectall) {
+							for (var i = 0; i < this.ress.list.length; i++) {
+								if (this.bathselect.indexOf(this.ress.list[i].re_id) == -1) {
+									// 判断没有重复再添加
+									this.bathselect.push(this.ress.list[i].re_id);
+								}
+							}
+						} else {
+							this.bathselect = [];
+						}
+					},
+					searchpage: function(ctpage) {
+						this.currentpage = Number(ctpage);
+
+						//获取表单信息
+						axios.post("http://localhost:8088/bracelet/aproj/treat/getpersonlist", {
+								"username": this.username,
+								"approval_state": this.searchState,
+								"pageNum": this.currentpage,
+								"pageSize": this.pageSize
+							})
+							.then(res => {
+								this.ress = res.data.result;
+							})
+							.catch(error => {
+								location.href = "错误界面.html";
+							});
+					},
+					goServant: function(re_id) {
+						location.replace("处方明细.html?re_id=" + re_id);
+					},
+					goServant2: function(re_id) {
+						location.replace("报销明细.html?re_id=" + re_id + "&ckf=" + this.ckf);
+					},
+					updateSta: function() {
+						if (this.bathselect.length == 0) {
+							alert("请选择处方单！");
+							return;
+						}
+
+						//遍历bathselect更新状态
+						for (var i in this.bathselect) {
+							axios.post("http://localhost:8088/bracelet/aproj/treat/updateState", {
+									"re_id": this.bathselect[i],
+									"approval_state": "S01"
+								})
+								.then(res => {
+									console.log(res);
+								})
+								.catch(error => {
+									location.href = "错误界面.html";
+								});
+						}
+						this.bathselect = [];
+						alert("提交成功！");
+
+						//重新请求
+						//location.replace("个人界面.html?username=" + this.username + "&password=" + this.password);
+						//searchpage(1);
+						location.reload();
+					}
+				},
+				created: function() {
+					var username = getQueryString("username");
+					var password = getQueryString("password");
+					if (!username || !password) {
+						location.href = "/错误界面.html";
+					}
+
+					this.username = username;
+					this.password = password;
+					//获取codelist
+					axios.post("http://localhost:8088/bracelet/aproj/acodename/getcodelist", {
+							"cgroup": "审批状态"
+						})
+						.then(res => {
+							console.log(res);
+							this.searchlist = res.data.result;
+						})
+						.catch(error => {
+							location.href = "错误界面.html";
+						});
+
+					axios.post("http://localhost:8088/bracelet/aproj/treat/getpersonlist", {
+							"username": this.username,
+							"approval_state": this.searchState,
+							"pageNum": this.currentpage,
+							"pageSize": this.pageSize
+						})
+						.then(res => {
+							this.ress = res.data.result;
+						})
+						.catch(error => {
+							location.href = "错误界面.html";
+						});
+
+					//获取头部信息
+					axios.post("http://localhost:8088/bracelet/aproj/authentication/getPersonInfo", {
+							"username": username,
+							"password": password
+						})
+						.then(res => {
+							this.result.person = res.data.result;
+						})
+						.catch(error => {
+							location.href = "错误界面.html";
+						});
+
+
+					searchpage(1);
+				},
+				mounted: function() {
+					// 数据挂载DOM完成事件
+				}
+			});
+		</script>
+
+	</body>
+
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<link rel="stylesheet" type="text/css" href="css/login.css" />
+		<style>
+		</style>
+	</head>
+
+	<body background="img/BG-3.JPG"
+		style=" background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+		<div id="app"
+			style="background:url('img/BG-4.png');background-size:100%;height:199px;background-attachment: fixed;">
+			<fieldset>
+				<legend>登录</legend>
+				<div class="form-group">
+					<label> </label>
+				</div>
+				<div class="form-group">
+					<label>用户名:</label>
+					<input type="text" v-model="param.username" @blur="check(1)" @focus="clear(1)" />
+					<span class="msg" v-if="errorFlg.userNameFlg">{{errorMsg.userNameMsg}}</span>
+				</div>
+				<div class="form-group">
+					<label>密码:</label>
+					<input type="password" v-model="param.password" @blur="check(2)" @focus="clear(2)" />
+					<span class="msg" v-if="errorFlg.passwordFlg">{{errorMsg.passwordMsg}}</span>
+				</div>
+				<div class="form-group">
+					<label></label>
+					<button @click="login()">登录</button>
+					<span class="msg" v-if="errorFlg.loginFlg">{{errorMsg.loginMsg}}</span>
+				</div>
+			</fieldset>
+		</div>
+		<script type="text/javascript" src="js/axios.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<script type="text/javascript" src="js/message.js"></script>
+		<script>
+			var vue = new Vue({
+				el: "#app",
+				data: {
+					param: {
+						"username": "",
+						"password": ""
+					},
+					errorFlg: {
+						"userNameFlg": false,
+						"passwordFlg": false,
+						"loginFlg": false
+					},
+					errorMsg: {
+						"userNameMsg": "",
+						"passwordMsg": "",
+						"loginMsg": ""
+					}
+				},
+				methods: {
+					login: function() {
+						this.check(1);
+						this.check(2);
+						if (this.errorFlg.userNameFlg || this.errorFlg.passwordFlg) {
+							return;
+						}
+						var self = this;
+						axios.post("http://localhost:8088/bracelet/aproj/authentication/login", {
+								"username": self.param.username,
+								"password": self.param.password
+							})
+							.then(res => {
+								console.log(res.data);
+								if (res.data.msgId == "A001") {
+									self.errorFlg.loginFlg = true;
+									self.errorMsg.loginMsg = message.A001;
+								} else if (res.data.msgId == "A002") {
+									self.errorFlg.loginFlg = true;
+									self.errorMsg.loginMsg = message.A002;
+								} else {
+									// 登录成功
+									sessionStorage.setItem("authtoken", res.data.result.authtoken);
+									sessionStorage.setItem("username", res.data.result.username);
+									location.replace("个人界面.html?username=" + self.param.username + "&password=" +
+										self.param.password);
+								}
+							})
+							.catch(error => {
+								location.href = "错误界面.html";
+							});
+					},
+					check: function(type) {
+						if (type == 1) {
+							if (this.param.username == null || this.param.username == "") {
+								this.errorFlg.userNameFlg = true;
+								this.errorMsg.userNameMsg = "请输入用户名";
+							}
+						} else if (type == 2) {
+							if (this.param.password == null || this.param.password == "") {
+								this.errorFlg.passwordFlg = true;
+								this.errorMsg.passwordMsg = "请输入密码";
+							}
+						}
+					},
+					clear: function(type) {
+						if (type == 1) {
+							this.errorFlg.userNameFlg = false;
+						} else if (type == 2) {
+							this.errorFlg.passwordFlg = false;
+						}
+					}
+				}
+			});
+		</script>
+	</body>
+
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>审批界面</title>
+		<link rel="stylesheet" type="text/css" href="css/审批界面.css" />
+	</head>
+
+	<body background="img/BG-3.JPG"
+		style=" background-repeat:no-repeat ;background-size:100% 100%;background-attachment: fixed;">
+		<div id="app">
+			<button @click="search()">查找</button>
+			<input type="text" v-model="param.sinum" @blur="check()" @focus="clear()" />
+			<span class="msg" v-if="errorFlg.sinumFlg">{{errorMsg.sinumMsg}}</span>
+			<div id="mid-set">
+				<table class="personInfoTab">
+					<tr>
+						<th>序号</th>
+						<th>报销单编号</th>
+						<th>姓名</th>
+						<th>社保卡号</th>
+						<th>处方编号</th>
+						<th>总金额</th>
+						<th>处方开具日期</th>
+						<th>审批提交日期</th>
+						<th>备注</th>
+						<th></th>
+					</tr>
+					<tr v-for="(item,index) in result.list">
+						<td>{{index + 1}}</td>
+						<td>{{item.tm_id}}</td>
+						<td>{{item.name}}</td>
+						<td>{{item.sinum}}</td>
+						<td>{{item.re_id}}</td>
+						<td>{{item.all_price}}</td>
+						<td>{{item.buy_date}}</td>
+						<td>{{item.approval_date}}</td>
+						<td>{{item.approval_suggestion}}</td>
+						<td>
+							<button @click="goServant(item.re_id,item.approval_state)">查看明细</button>
+						</td>
+					</tr>
+				</table>
+			</div>
+			<div class="sqArea">
+				<ul class="pagination" style="margin-top: 2px;">
+					<li v-for="n in result.pages">
+						<a href="javascript:void(0);" @click="searchpage(n)"
+							:class="{'active' : n==result.pageNum}">{{n}}</a>
+					</li>
+					<li>
+						<select @change="searchpage(1)" v-model="pageSize">
+							<option v-for="item in pagecountlist" :value="item">{{item}}</option>
+						</select>
+					</li>
+				</ul>
+			</div>
+			<div id="#mid-set">
+				<button style="left: 50%;margin-left: 330px;" @click="goAdmin()">返回</button>
+			</div>
+		</div>
+		<script type="text/javascript" src="js/urlparse.js"></script>
+		<script type="text/javascript" src="js/axios.js"></script>
+		<script type="text/javascript" src="js/vue.js"></script>
+		<script type="text/javascript" src="js/message.js"></script>
+		<script>
+			var vm = new Vue({
+				el: "#app",
+				data: {
+					username: "",
+					password: "",
+					param: {
+						"sinum": "",
+					},
+					result: {
+						"list": {}
+					},
+					"pagecountlist": [5, 10, 20, 30, 50],
+					pageSize: 5,
+					currentpage: 1,
+					errorFlg: {
+						"sinumFlg": false,
+					},
+					errorMsg: {
+						"sinumMsg": "",
+					}
+				},
+				methods: {
+					goAdmin: function() {
+						location.replace("管理员界面.html?username=" + this.username + "&password=" + this.password);
+					},
+					goServant: function(re_id) {
+						location.replace("审批明细.html?re_id=" + re_id + "&username=" + this.username + "&password=" +
+							this.password);
+					},
+					check: function() {
+						if (this.param.sinum == null || this.param.sinum == "") {
+							this.errorFlg.sinumFlg = true;
+							this.errorMsg.sinumMsg = "请输入查询内容，支持模糊查询";
+						}
+					},
+					clear: function() {
+						this.errorFlg.sinumFlg = false;
+						this.errorMsg.sinumMsg = "";
+					},
+					searchpage: function(ctpage) {
+						this.currentpage = Number(ctpage);
+						axios.post("http://localhost:8088/bracelet/aproj/treat/getsecondlist", {
+								"pageNum": this.currentpage,
+								"pageSize": this.pageSize
+							})
+							.then(res => {
+								this.result = res.data.result;
+							})
+							.catch(error => {
+								location.href = "错误界面.html";
+							});
+					},
+					search: function() {
+						this.check();
+						axios.post("http://localhost:8088/bracelet/aproj/treat/getsecondnumlist", {
+								"sinum": this.param.sinum,
+								"pageNum": this.currentpage,
+								"pageSize": this.pageSize
+							})
+							.then(res => {
+								this.result = res.data.result;
+							})
+							.catch(error => {
+								location.href = "错误界面.html";
+							});
+					}
+				},
+				created: function() {
+					var username = getQueryString("username");
+					var password = getQueryString("password");
+					if (!username || !password) {
+						location.href = "/错误界面.html";
+					}
+
+					this.username = username;
+					this.password = password;
+
+					axios.post("http://localhost:8088/bracelet/aproj/treat/getsecondlist", {
+							"pageNum": this.currentpage,
+							"pageSize": this.pageSize
+						})
+						.then(res => {
+							this.result = res.data.result;
+						})
+						.catch(error => {
+							location.href = "错误界面.html";
+						});
+				},
+				mounted: function() {
+					// 数据挂载DOM完成事件
+				}
+
+			});
+		</script>
+	</body>
+
+</html>
